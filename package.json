@@ -1,0 +1,31 @@
+{
+  "name": "machinaflow-ecosystem",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Industrial AI-Driven Multi-Repo Ecosystem for MachinaFlow",
+  "workspaces": [
+    "machina-web",
+    "machina-core",
+    "machina-core/shared",
+    "machina-infra/simulator"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=@machina/simulator & npm run dev --workspace=@machina/core & npm run dev --workspace=@machina/web",
+    "dev:core": "npm run dev --workspace=@machina/core",
+    "dev:web": "npm run dev --workspace=@machina/web",
+    "dev:simulator": "npm run dev --workspace=@machina/simulator",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "keywords": [
+    "industrial-automation",
+    "react-flow",
+    "modbus-tcp",
+    "scada",
+    "ai-sdlc",
+    "multi-repo"
+  ],
+  "author": "",
+  "license": "MIT"
+}

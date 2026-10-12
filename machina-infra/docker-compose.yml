@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # Mock PLC Simulator (Campo Industrial / OT)
+  simulator:
+    build:
+      context: ..
+      dockerfile: machina-infra/docker/simulator.Dockerfile
+    container_name: machina-simulator
+    ports:
+      - "127.0.0.1:5020:5020" # Confinado a localhost, nunca em 0.0.0.0
+    restart: unless-stopped
+    networks:
+      - machina-field-net
+
+  # Core Orchestration Engine (Dual-Homed Gateway IT/OT)
+  core:
+    build:
+      context: ..
+      dockerfile: machina-infra/docker/backend.Dockerfile
+    container_name: machina-core
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - CORS_ORIGIN=http://localhost:5173
+      - SIMULATOR_HOST=simulator
+      - SIMULATOR_PORT=5020
+    depends_on:
+      - simulator
+    restart: unless-stopped
+    networks:
+      - machina-corp-net
+      - machina-field-net
+
+  # Web HMI & React Flow Canvas (Corporativa / IT)
+  web:
+    build:
+      context: ..
+      dockerfile: machina-infra/docker/frontend.Dockerfile
+    container_name: machina-web
+    ports:
+      - "5173:80"
+    depends_on:
+      - core
+    restart: unless-stopped
+    networks:
+      - machina-corp-net
+    # machina-web NÃO tem acesso à machina-field-net (Zero-Trust OT Isolation)
+
+networks:
+  # Rede Corporativa / IHM
+  machina-corp-net:
+    driver: bridge
+
+  # Rede Industrial Isolada de Campo (Sem saída de internet)
+  machina-field-net:
+    driver: bridge
+    internal: true
